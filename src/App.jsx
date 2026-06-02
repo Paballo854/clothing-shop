@@ -10,6 +10,14 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState('dashboard');
   const [menuOpen, setMenuOpen] = useState(false);
+  
+  // Dashboard stats
+  const [stats, setStats] = useState({
+    totalSales: 0,
+    creditOutstanding: 0,
+    productsInStock: 0,
+    overduePayments: 0
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -23,6 +31,51 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Load dashboard stats
+  const loadStats = async () => {
+    // Get total products in stock
+    const { data: products } = await supabase.from('products').select('quantity');
+    const totalStock = products ? products.reduce((sum, p) => sum + (p.quantity || 0), 0) : 0;
+    
+    // Get credit outstanding
+    const { data: credits } = await supabase.from('credits').select('total_amount, amount_paid, status, due_date');
+    let totalOutstanding = 0;
+    let overdue = 0;
+    const today = new Date();
+    
+    if (credits) {
+      credits.forEach(c => {
+        if (c.status !== 'Paid') {
+          const balance = c.total_amount - c.amount_paid;
+          totalOutstanding += balance;
+          
+          // Check if overdue
+          const dueDate = new Date(c.due_date);
+          if (dueDate < today && balance > 0) {
+            overdue += 1;
+          }
+        }
+      });
+    }
+    
+    // Get total sales (from credits and cash sales)
+    const { data: allCredits } = await supabase.from('credits').select('total_amount');
+    const totalSales = allCredits ? allCredits.reduce((sum, c) => sum + c.total_amount, 0) : 0;
+    
+    setStats({
+      totalSales: totalSales,
+      creditOutstanding: totalOutstanding,
+      productsInStock: totalStock,
+      overduePayments: overdue
+    });
+  };
+
+  useEffect(() => {
+    if (user) {
+      loadStats();
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -53,22 +106,22 @@ function App() {
       <div style={{ display: 'grid', gap: '12px', marginBottom: '24px' }}>
         <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', padding: '16px', borderRadius: '12px' }}>
           <div style={{ fontSize: '12px', opacity: 0.9 }}>Total Sales</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>M0.00</div>
-          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Today</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>M{stats.totalSales.toFixed(2)}</div>
+          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>All time</div>
         </div>
         <div style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white', padding: '16px', borderRadius: '12px' }}>
           <div style={{ fontSize: '12px', opacity: 0.9 }}>Credit Outstanding</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>M0.00</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>M{stats.creditOutstanding.toFixed(2)}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Active Debts</div>
         </div>
         <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '16px', borderRadius: '12px' }}>
           <div style={{ fontSize: '12px', opacity: 0.9 }}>Products in Stock</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>0</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.productsInStock}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Available</div>
         </div>
         <div style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', color: '#1e293b', padding: '16px', borderRadius: '12px' }}>
           <div style={{ fontSize: '12px', opacity: 0.9 }}>Overdue Payments</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>0</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.overduePayments}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Need Follow Up</div>
         </div>
       </div>
