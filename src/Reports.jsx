@@ -14,6 +14,7 @@ function Reports() {
   const [topProducts, setTopProducts] = useState([]);
   const [recentCredits, setRecentCredits] = useState([]);
   const [topCustomers, setTopCustomers] = useState([]);
+  const [unsoldProducts, setUnsoldProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
@@ -26,7 +27,19 @@ function Reports() {
     const { data: customersData } = await supabase.from('customers').select('*');
     setCustomers(customersData || []);
     
+    const { data: allProducts } = await supabase.from('products').select('*');
     const { data: credits } = await supabase.from('credits').select('*');
+    
+    // Find unsold products
+    if (allProducts && allProducts.length > 0 && credits) {
+      const soldProductNames = new Set();
+      credits.forEach(c => {
+        soldProductNames.add(c.product_name);
+      });
+      
+      const unsold = allProducts.filter(p => !soldProductNames.has(p.name));
+      setUnsoldProducts(unsold);
+    }
     
     if (credits && credits.length > 0) {
       let totalSales = 0;
@@ -134,8 +147,9 @@ function Reports() {
             </div>
           </div>
 
+          {/* Top Selling Products */}
           <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#1e293b' }}> {t.topSellingProducts}</h2>
+            <h2 style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#1e293b' }}> 🏆 {t.topSellingProducts}</h2>
             {topProducts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>{t.noSalesYet}</div>
             ) : (
@@ -155,8 +169,42 @@ function Reports() {
             )}
           </div>
 
+          {/* Unsold Products */}
           <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#1e293b' }}> {t.topCustomers}</h2>
+            <h2 style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#1e293b' }}> 📦 {t.unsoldProducts}</h2>
+            {unsoldProducts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '24px', color: '#10b981' }}>
+                ✅ {t.allProductsSold}
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '12px', color: '#ef4444', marginBottom: '12px' }}>
+                  ⚠️ {unsoldProducts.length} {t.unsoldDescription}:
+                </p>
+                {unsoldProducts.map(function(p, idx) {
+                  return (
+                    <div key={idx} style={{ padding: '10px 0', borderBottom: idx < unsoldProducts.length - 1 ? '1px solid #e2e8f0' : 'none' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <span style={{ fontWeight: '600', color: '#dc2626' }}>{p.name}</span>
+                          <div style={{ fontSize: '11px', color: '#64748b' }}>{t.stock}: {p.quantity} | {t.price}: M{p.price}</div>
+                          {p.category && <div style={{ fontSize: '10px', color: '#94a3b8' }}>{p.category} {p.size ? '| ' + t.size + ': ' + p.size : ''} {p.color ? '| ' + p.color : ''}</div>}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#f59e0b' }}>{t.notSoldYet}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', fontSize: '12px', color: '#64748b' }}>
+                  💡 {t.promotionTip}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Top Customers */}
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <h2 style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#1e293b' }}> 👥 {t.topCustomers}</h2>
             {topCustomers.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>{t.noCustomersYet}</div>
             ) : (
@@ -176,8 +224,9 @@ function Reports() {
             )}
           </div>
 
+          {/* Recent Credit Sales */}
           <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#1e293b' }}> {t.recentCreditSales}</h2>
+            <h2 style={{ fontSize: '16px', margin: '0 0 12px 0', color: '#1e293b' }}> 📋 {t.recentCreditSales}</h2>
             {recentCredits.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>{t.noCreditSalesYet}</div>
             ) : (

@@ -95,6 +95,13 @@ const en = {
   noSalesYet: 'No sales yet',
   noCustomersYet: 'No customers yet',
   noCreditSalesYet: 'No credit sales yet',
+  unsoldProducts: 'Unsold Products',
+  unsoldDescription: 'product(s) have never been sold',
+  stock: 'Stock',
+  price: 'Price',
+  notSoldYet: 'Not sold yet',
+  promotionTip: 'Tip: Consider promoting these products or offering discounts!',
+  allProductsSold: 'All products have been sold!',
   
   // Messages
   error: 'Error',
@@ -221,6 +228,13 @@ const st = {
   noSalesYet: 'Ha ho na thekiso',
   noCustomersYet: 'Ha ho na bareki',
   noCreditSalesYet: 'Ha ho na thekiso ea mokoloto',
+  unsoldProducts: 'Lihlahisoa tse sa Rekisoang',
+  unsoldDescription: 'lihlahisoa ha li so reke',
+  stock: 'Thepa',
+  price: 'Theko',
+  notSoldYet: 'Ha e so reke',
+  promotionTip: 'Keletso: Nahana ka ho phatlalatsa lihlahisoa tsena kapa ho fana ka ditheolelo!',
+  allProductsSold: 'Lihlahisoa tsohle di rekisitse!',
   
   // Messages
   error: 'Phoso',
