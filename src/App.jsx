@@ -16,6 +16,7 @@ function App() {
     totalSales: 0,
     creditOutstanding: 0,
     productsInStock: 0,
+    totalStockValue: 0,
     overduePayments: 0
   });
 
@@ -34,18 +35,29 @@ function App() {
 
   // Load dashboard stats
   const loadStats = async () => {
-    // Get total products in stock
-    const { data: products } = await supabase.from('products').select('quantity');
-    const totalStock = products ? products.reduce((sum, p) => sum + (p.quantity || 0), 0) : 0;
+    // Get products for stock value and total quantity
+    const { data: products } = await supabase.from('products').select('price, quantity');
+    let totalStockValue = 0;
+    let totalStockQuantity = 0;
     
-    // Get credit outstanding
+    if (products) {
+      products.forEach(p => {
+        totalStockValue += (p.price || 0) * (p.quantity || 0);
+        totalStockQuantity += (p.quantity || 0);
+      });
+    }
+    
+    // Get credit outstanding and total sales
     const { data: credits } = await supabase.from('credits').select('total_amount, amount_paid, status, due_date');
     let totalOutstanding = 0;
     let overdue = 0;
+    let totalSales = 0;
     const today = new Date();
     
     if (credits) {
       credits.forEach(c => {
+        totalSales += c.total_amount;
+        
         if (c.status !== 'Paid') {
           const balance = c.total_amount - c.amount_paid;
           totalOutstanding += balance;
@@ -59,14 +71,11 @@ function App() {
       });
     }
     
-    // Get total sales (from credits and cash sales)
-    const { data: allCredits } = await supabase.from('credits').select('total_amount');
-    const totalSales = allCredits ? allCredits.reduce((sum, c) => sum + c.total_amount, 0) : 0;
-    
     setStats({
       totalSales: totalSales,
       creditOutstanding: totalOutstanding,
-      productsInStock: totalStock,
+      productsInStock: totalStockQuantity,
+      totalStockValue: totalStockValue,
       overduePayments: overdue
     });
   };
@@ -109,16 +118,19 @@ function App() {
           <div style={{ fontSize: '24px', fontWeight: 'bold' }}>M{stats.totalSales.toFixed(2)}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>All time</div>
         </div>
+        
         <div style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white', padding: '16px', borderRadius: '12px' }}>
           <div style={{ fontSize: '12px', opacity: 0.9 }}>Credit Outstanding</div>
           <div style={{ fontSize: '24px', fontWeight: 'bold' }}>M{stats.creditOutstanding.toFixed(2)}</div>
           <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Active Debts</div>
         </div>
+        
         <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '16px', borderRadius: '12px' }}>
-          <div style={{ fontSize: '12px', opacity: 0.9 }}>Products in Stock</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.productsInStock}</div>
-          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>Available</div>
+          <div style={{ fontSize: '12px', opacity: 0.9 }}>Total Stock Value</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>M{stats.totalStockValue.toFixed(2)}</div>
+          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '4px' }}>{stats.productsInStock} items in stock</div>
         </div>
+        
         <div style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', color: '#1e293b', padding: '16px', borderRadius: '12px' }}>
           <div style={{ fontSize: '12px', opacity: 0.9 }}>Overdue Payments</div>
           <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.overduePayments}</div>
