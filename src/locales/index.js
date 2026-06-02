@@ -79,6 +79,23 @@ const en = {
   statusPaid: 'PAID',
   overdue: 'OVERDUE',
   
+  // Reports
+  reportsTitle: 'Reports',
+  totalSalesRevenue: 'Total Sales Revenue',
+  fromCreditSales: 'from credit sales',
+  totalPaid: 'Total Paid',
+  outstanding: 'Outstanding',
+  topSellingProducts: 'Top Selling Products',
+  soldUnits: 'sold units',
+  topCustomers: 'Top Customers',
+  purchases: 'purchases',
+  recentCreditSales: 'Recent Credit Sales',
+  customer: 'Customer',
+  due: 'Due',
+  noSalesYet: 'No sales yet',
+  noCustomersYet: 'No customers yet',
+  noCreditSalesYet: 'No credit sales yet',
+  
   // Messages
   error: 'Error',
   loading: 'Loading...',
@@ -187,6 +204,23 @@ const st = {
   active: 'E LEBELEETSOE',
   statusPaid: 'E LEFILOE',
   overdue: 'E SILOE',
+  
+  // Reports
+  reportsTitle: 'Litlaleho',
+  totalSalesRevenue: 'Kakaretso ea Thekiso',
+  fromCreditSales: 'ho tswa thekisong ya mokoloto',
+  totalPaid: 'Kakaretso e Lefilweng',
+  outstanding: 'E Setseng',
+  topSellingProducts: 'Lihlahisoa tse Rekisoang ka ho Fetisisa',
+  soldUnits: 'diyuniti tse rekisitsweng',
+  topCustomers: 'Bareki ba ka Holimo',
+  purchases: 'ditheko',
+  recentCreditSales: 'Thekiso ea Mokoloto ea Morao',
+  customer: 'Moreki',
+  due: 'E lebisitswe',
+  noSalesYet: 'Ha ho na thekiso',
+  noCustomersYet: 'Ha ho na bareki',
+  noCreditSalesYet: 'Ha ho na thekiso ea mokoloto',
   
   // Messages
   error: 'Phoso',

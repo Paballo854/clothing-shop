@@ -4,6 +4,7 @@ import Login from './Login';
 import Customers from './Customers';
 import Products from './Products';
 import CreditSales from './CreditSales';
+import Reports from './Reports';
 import { useLanguage } from './LanguageContext';
 
 function App() {
@@ -149,7 +150,7 @@ function App() {
           <div style={{ fontSize: '28px' }}>💰</div>
           <h3 style={{ margin: '6px 0 0', fontSize: '13px', color: '#1e293b' }}>{t.creditSales}</h3>
         </div>
-        <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <div onClick={() => setPage('reports')} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', textAlign: 'center', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <div style={{ fontSize: '28px' }}>📊</div>
           <h3 style={{ margin: '6px 0 0', fontSize: '13px', color: '#1e293b' }}>{t.reports}</h3>
         </div>
@@ -226,6 +227,7 @@ function App() {
             <button onClick={() => { setPage('customers'); setMenuOpen(false); }} style={{ backgroundColor: page === 'customers' ? '#3b82f6' : 'transparent', color: page === 'customers' ? 'white' : '#64748b', padding: '10px', border: page === 'customers' ? 'none' : '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', width: '100%', textAlign: 'left', paddingLeft: '12px' }}>👥 {t.customers}</button>
             <button onClick={() => { setPage('products'); setMenuOpen(false); }} style={{ backgroundColor: page === 'products' ? '#3b82f6' : 'transparent', color: page === 'products' ? 'white' : '#64748b', padding: '10px', border: page === 'products' ? 'none' : '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', width: '100%', textAlign: 'left', paddingLeft: '12px' }}>👟 {t.products}</button>
             <button onClick={() => { setPage('credits'); setMenuOpen(false); }} style={{ backgroundColor: page === 'credits' ? '#3b82f6' : 'transparent', color: page === 'credits' ? 'white' : '#64748b', padding: '10px', border: page === 'credits' ? 'none' : '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', width: '100%', textAlign: 'left', paddingLeft: '12px' }}>💰 {t.creditSales}</button>
+            <button onClick={() => { setPage('reports'); setMenuOpen(false); }} style={{ backgroundColor: page === 'reports' ? '#3b82f6' : 'transparent', color: page === 'reports' ? 'white' : '#64748b', padding: '10px', border: page === 'reports' ? 'none' : '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', width: '100%', textAlign: 'left', paddingLeft: '12px' }}>📊 {t.reports}</button>
             <button onClick={handleLogout} style={{ backgroundColor: '#ef4444', color: 'white', padding: '10px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', width: '100%', textAlign: 'left', paddingLeft: '12px' }}>🚪 {t.logout}</button>
           </div>
         )}
@@ -236,6 +238,7 @@ function App() {
         {page === 'customers' && <Customers />}
         {page === 'products' && <Products />}
         {page === 'credits' && <CreditSales />}
+        {page === 'reports' && <Reports />}
       </div>
     </div>
   );
