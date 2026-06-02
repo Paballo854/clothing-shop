@@ -17,7 +17,7 @@ function Customers() {
     let query = supabase.from('customers').select('*');
     
     if (searchTerm) {
-      query = query.or(irst_name.ilike.%%,surname.ilike.%%,phone.ilike.%%);
+      query = query.or('first_name.ilike.%' + searchTerm + '%,surname.ilike.%' + searchTerm + '%,phone.ilike.%' + searchTerm + '%');
     }
     
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -65,7 +65,6 @@ function Customers() {
 
   return (
     <div style={{ padding: '16px' }}>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '20px', color: '#1e293b', margin: 0 }}>Customer Management</h1>
@@ -88,7 +87,6 @@ function Customers() {
         </button>
       </div>
 
-      {/* Add Customer Form */}
       {showForm && (
         <div style={{
           backgroundColor: 'white',
@@ -112,34 +110,34 @@ function Customers() {
         </div>
       )}
 
-      {/* Search Bar */}
       <input
         type="text"
-        placeholder="🔍 Search by name, surname, or phone..."
+        placeholder="Search by name, surname, or phone..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}
       />
 
-      {/* Customers List - Mobile Cards View */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px' }}>Loading...</div>
       ) : customers.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '12px' }}>No customers found.</div>
       ) : (
-        customers.map(c => (
-          <div key={c.id} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', marginBottom: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div>
-                <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#1e293b' }}>{c.first_name} {c.surname}</span>
+        customers.map(function(c) {
+          return (
+            <div key={c.id} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', marginBottom: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div>
+                  <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#1e293b' }}>{c.first_name} {c.surname}</span>
+                </div>
+                <button onClick={() => deleteCustomer(c.id)} style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Delete</button>
               </div>
-              <button onClick={() => deleteCustomer(c.id)} style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Delete</button>
+              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>Phone: {c.phone}</div>
+              {c.email && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>Email: {c.email}</div>}
+              {c.address && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>Address: {c.address}</div>}
             </div>
-            <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>📞 {c.phone}</div>
-            {c.email && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>✉️ {c.email}</div>}
-            {c.address && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>📍 {c.address}</div>}
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );
