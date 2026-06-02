@@ -15,20 +15,24 @@ function Products() {
   const loadProducts = async () => {
     setLoading(true);
     const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    console.log('Products from DB:', data);
     if (!error) setProducts(data || []);
     setLoading(false);
   };
 
   const addProduct = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.from('products').insert([{
+    const productData = {
       name: name,
-      category: category,
-      size: size,
-      color: color,
+      category: category || null,
+      size: size || null,
+      color: color || null,
       price: parseFloat(price),
       quantity: parseInt(quantity)
-    }]);
+    };
+    console.log('Adding product:', productData);
+    
+    const { error } = await supabase.from('products').insert([productData]);
     if (error) {
       alert('Error: ' + error.message);
     } else {
@@ -92,14 +96,14 @@ function Products() {
           />
           <input
             type="text"
-            placeholder="Category"
+            placeholder="Category (e.g., Shoes, T-shirt)"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }}
           />
           <input
             type="text"
-            placeholder="Size"
+            placeholder="Size (e.g., S, M, L, 38, 40)"
             value={size}
             onChange={(e) => setSize(e.target.value)}
             style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }}
