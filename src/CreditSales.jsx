@@ -63,7 +63,7 @@ function CreditSales() {
     if (error) {
       alert('Error: ' + error.message);
     } else {
-      alert('Credit sale recorded successfully');
+      alert('Credit sale recorded!');
       setSelectedCustomer('');
       setSelectedProduct('');
       setQuantity(1);
@@ -90,7 +90,7 @@ function CreditSales() {
     }]);
 
     if (paymentError) {
-      alert('Error recording payment: ' + paymentError.message);
+      alert('Error: ' + paymentError.message);
       return;
     }
 
@@ -100,9 +100,9 @@ function CreditSales() {
       .eq('id', selectedCredit);
 
     if (updateError) {
-      alert('Error updating credit: ' + updateError.message);
+      alert('Error: ' + updateError.message);
     } else {
-      alert('Payment of M' + amount + ' recorded! Remaining balance: M' + newBalance);
+      alert('Payment of M' + amount + ' recorded! Balance: M' + newBalance);
       setPaymentAmount('');
       setSelectedCredit(null);
       setShowPaymentForm(false);
@@ -116,112 +116,75 @@ function CreditSales() {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1 style={{ color: '#1e293b', marginBottom: '20px' }}>Credit Sales</h1>
+    <div style={{ padding: '16px' }}>
+      <h1 style={{ fontSize: '20px', color: '#1e293b', marginBottom: '16px' }}>Credit Sales</h1>
 
-      <div style={{ backgroundColor: '#f3f4f6', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>New Credit Sale</h2>
+      {/* New Credit Sale Form */}
+      <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '12px', marginBottom: '20px' }}>
+        <h2 style={{ fontSize: '16px', marginBottom: '12px' }}>New Credit Sale</h2>
         <form onSubmit={addCreditSale}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-            <select value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
-              <option value="">Select Customer *</option>
-              {customers.map(c => (
-                <option key={c.id} value={c.id}>{c.first_name} {c.surname} ({c.phone})</option>
-              ))}
-            </select>
+          <select value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value)} required style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }}>
+            <option value="">Select Customer *</option>
+            {customers.map(c => (<option key={c.id} value={c.id}>{c.first_name} {c.surname}</option>))}
+          </select>
 
-            <select value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
-              <option value="">Select Product *</option>
-              {products.map(p => (
-                <option key={p.id} value={p.id}>{p.name} - M{p.price} (Stock: {p.quantity})</option>
-              ))}
-            </select>
+          <select value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)} required style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }}>
+            <option value="">Select Product *</option>
+            {products.map(p => (<option key={p.id} value={p.id}>{p.name} - M{p.price}</option>))}
+          </select>
 
-            <input type="number" placeholder="Quantity" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value))} min="1" required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
-
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
-          </div>
-          <button type="submit" style={{ marginTop: '15px', backgroundColor: '#3b82f6', color: 'white', padding: '8px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Add Credit Sale
-          </button>
+          <input type="number" placeholder="Quantity" value={quantity} onChange={(e) => setQuantity(e.target.value)} min="1" required style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
+          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
+          <button type="submit" style={{ width: '100%', backgroundColor: '#3b82f6', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>Add Credit Sale</button>
         </form>
       </div>
 
-      {!showPaymentForm ? (
-        <button onClick={() => setShowPaymentForm(true)} style={{ backgroundColor: '#10b981', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px' }}>
-          Record Payment
-        </button>
-      ) : (
-        <div style={{ backgroundColor: '#f3f4f6', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Record Payment</h2>
+      {/* Record Payment Button */}
+      <button onClick={() => setShowPaymentForm(!showPaymentForm)} style={{ width: '100%', backgroundColor: '#10b981', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', marginBottom: '20px' }}>
+        {showPaymentForm ? 'Cancel Payment' : 'Record Payment'}
+      </button>
+
+      {/* Record Payment Form */}
+      {showPaymentForm && (
+        <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '12px', marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '16px', marginBottom: '12px' }}>Record Payment</h2>
           <form onSubmit={recordPayment}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-              <select value={selectedCredit} onChange={(e) => setSelectedCredit(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
-                <option value="">Select Credit *</option>
-                {credits.filter(c => c.status !== 'Paid').map(c => (
-                  <option key={c.id} value={c.id}>
-                    {getCustomerName(c.customer_id)} - {c.product_name} - Owes: M{(c.total_amount - c.amount_paid).toFixed(2)}
-                  </option>
-                ))}
-              </select>
-              <input type="number" placeholder="Payment Amount *" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} required style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
-            </div>
-            <div style={{ marginTop: '15px' }}>
-              <button type="submit" style={{ backgroundColor: '#10b981', color: 'white', padding: '8px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' }}>Submit Payment</button>
-              <button type="button" onClick={() => { setShowPaymentForm(false); setSelectedCredit(null); setPaymentAmount(''); }} style={{ backgroundColor: '#ef4444', color: 'white', padding: '8px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
-            </div>
+            <select value={selectedCredit} onChange={(e) => setSelectedCredit(e.target.value)} required style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }}>
+              <option value="">Select Credit *</option>
+              {credits.filter(c => c.status !== 'Paid').map(c => (
+                <option key={c.id} value={c.id}>{getCustomerName(c.customer_id)} - {c.product_name} - Owed: M{(c.total_amount - c.amount_paid).toFixed(2)}</option>
+              ))}
+            </select>
+            <input type="number" placeholder="Payment Amount *" value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} required style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
+            <button type="submit" style={{ width: '100%', backgroundColor: '#10b981', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>Submit Payment</button>
           </form>
         </div>
       )}
 
-      <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Active Credits</h2>
+      {/* Credits List - Mobile Cards View */}
+      <h2 style={{ fontSize: '16px', marginBottom: '12px' }}>Active Credits</h2>
       {loading ? <p>Loading...</p> : credits.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>No credit sales yet.</div>
+        <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '12px' }}>No credit sales yet.</div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f1f5f9' }}>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Customer</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Product</th>
-                <th style={{ padding: '12px', textAlign: 'center' }}>Qty</th>
-                <th style={{ padding: '12px', textAlign: 'right' }}>Total (M)</th>
-                <th style={{ padding: '12px', textAlign: 'right' }}>Paid (M)</th>
-                <th style={{ padding: '12px', textAlign: 'right' }}>Balance (M)</th>
-                <th style={{ padding: '12px', textAlign: 'center' }}>Due Date</th>
-                <th style={{ padding: '12px', textAlign: 'center' }}>Status</th>
-               </tr>
-            </thead>
-            <tbody>
-              {credits.map(c => {
-                const balance = c.total_amount - c.amount_paid;
-                const isOverdue = balance > 0 && new Date(c.due_date) < new Date();
-                return (
-                  <tr key={c.id} style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: isOverdue ? '#fee2e2' : 'white' }}>
-                    <td style={{ padding: '12px' }}>{getCustomerName(c.customer_id)}</td>
-                    <td style={{ padding: '12px' }}>{c.product_name}</td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>{c.quantity}</td>
-                    <td style={{ padding: '12px', textAlign: 'right' }}>M{c.total_amount}</td>
-                    <td style={{ padding: '12px', textAlign: 'right' }}>M{c.amount_paid}</td>
-                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', color: balance > 0 ? '#dc2626' : '#10b981' }}>M{balance}</td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>{c.due_date}</td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
-                      <span style={{
-                        backgroundColor: c.status === 'Paid' ? '#10b981' : (isOverdue ? '#ef4444' : '#f59e0b'),
-                        color: 'white',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px'
-                      }}>
-                        {c.status === 'Paid' ? 'PAID' : (isOverdue ? 'OVERDUE' : 'ACTIVE')}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        credits.map(c => {
+          const balance = c.total_amount - c.amount_paid;
+          const isOverdue = balance > 0 && new Date(c.due_date) < new Date();
+          return (
+            <div key={c.id} style={{ backgroundColor: isOverdue ? '#fee2e2' : 'white', borderRadius: '12px', padding: '16px', marginBottom: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontWeight: 'bold', fontSize: '15px', color: '#1e293b' }}>{getCustomerName(c.customer_id)}</span>
+                <span style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '12px', backgroundColor: c.status === 'Paid' ? '#10b981' : (isOverdue ? '#ef4444' : '#f59e0b'), color: 'white' }}>{c.status === 'Paid' ? 'PAID' : (isOverdue ? 'OVERDUE' : 'ACTIVE')}</span>
+              </div>
+              <div style={{ fontSize: '13px', color: '#64748b' }}>Product: {c.product_name} x{c.quantity}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #e2e8f0' }}>
+                <span>Total: <strong>M{c.total_amount}</strong></span>
+                <span>Paid: <strong>M{c.amount_paid}</strong></span>
+                <span style={{ color: '#dc2626' }}>Balance: <strong>M{balance}</strong></span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>Due: {c.due_date}</div>
+            </div>
+          );
+        })
       )}
     </div>
   );
