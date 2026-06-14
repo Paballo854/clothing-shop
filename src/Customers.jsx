@@ -32,7 +32,7 @@ function Customers() {
     setEditingId(customer.id);
     setFirstName(customer.first_name);
     setSurname(customer.surname);
-    setPhone(customer.phone);
+    setPhone(customer.phone || '');
     setEmail(customer.email || '');
     setAddress(customer.address || '');
     setShowForm(true);
@@ -42,11 +42,18 @@ function Customers() {
     e.preventDefault();
     setLoading(true);
     
+    const customerData = {
+      first_name: firstName,
+      surname: surname,
+      phone: phone || null,
+      email: email || null,
+      address: address || null
+    };
+    
     if (editingId) {
-      // Update existing customer
       const { error } = await supabase
         .from('customers')
-        .update({ first_name: firstName, surname: surname, phone: phone, email: email, address: address })
+        .update(customerData)
         .eq('id', editingId);
       
       if (error) {
@@ -57,14 +64,7 @@ function Customers() {
         fetchCustomers();
       }
     } else {
-      // Add new customer
-      const { error } = await supabase.from('customers').insert([{
-        first_name: firstName,
-        surname: surname,
-        phone: phone,
-        email: email,
-        address: address
-      }]);
+      const { error } = await supabase.from('customers').insert([customerData]);
       
       if (error) {
         alert('Error: ' + error.message);
@@ -132,11 +132,43 @@ function Customers() {
         }}>
           <h2 style={{ margin: '0 0 12px 0', fontSize: '16px' }}>{editingId ? 'Edit Customer' : 'New Customer'}</h2>
           <form onSubmit={addOrUpdateCustomer}>
-            <input type="text" placeholder={t.firstName + ' *'} required value={firstName} onChange={(e) => setFirstName(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
-            <input type="text" placeholder={t.surname + ' *'} required value={surname} onChange={(e) => setSurname(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
-            <input type="tel" placeholder={t.phoneNumber + ' *'} required value={phone} onChange={(e) => setPhone(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
-            <input type="email" placeholder={t.email} value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
-            <input type="text" placeholder={t.address} value={address} onChange={(e) => setAddress(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
+            <input 
+              type="text" 
+              placeholder={t.firstName + ' *'} 
+              required 
+              value={firstName} 
+              onChange={(e) => setFirstName(e.target.value)} 
+              style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} 
+            />
+            <input 
+              type="text" 
+              placeholder={t.surname + ' *'} 
+              required 
+              value={surname} 
+              onChange={(e) => setSurname(e.target.value)} 
+              style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} 
+            />
+            <input 
+              type="tel" 
+              placeholder={t.phoneNumber + ' (optional)'} 
+              value={phone} 
+              onChange={(e) => setPhone(e.target.value)} 
+              style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} 
+            />
+            <input 
+              type="email" 
+              placeholder={t.email + ' (optional)'} 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} 
+            />
+            <input 
+              type="text" 
+              placeholder={t.address + ' (optional)'} 
+              value={address} 
+              onChange={(e) => setAddress(e.target.value)} 
+              style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} 
+            />
             <div style={{ display: 'flex', gap: '10px' }}>
               <button type="submit" style={{ flex: 1, backgroundColor: '#10b981', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>{editingId ? 'Update' : 'Save'}</button>
               <button type="button" onClick={resetForm} style={{ flex: 1, backgroundColor: '#ef4444', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>{t.cancel}</button>
@@ -170,7 +202,7 @@ function Customers() {
                   <button onClick={() => deleteCustomer(c.id)} style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>{t.delete}</button>
                 </div>
               </div>
-              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>📞 {c.phone}</div>
+              {c.phone && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>📞 {c.phone}</div>}
               {c.email && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>✉️ {c.email}</div>}
               {c.address && <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>📍 {c.address}</div>}
             </div>
