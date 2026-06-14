@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { useLanguage } from './LanguageContext';
+import PeriodSelector from './PeriodSelector';
 
 function Products() {
   const { translations: t } = useLanguage();
@@ -8,6 +9,7 @@ function Products() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [currentPeriod, setCurrentPeriod] = useState('');
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [size, setSize] = useState('');
@@ -17,7 +19,13 @@ function Products() {
 
   const loadProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    let query = supabase.from('products').select('*');
+    
+    if (currentPeriod) {
+      query = query.eq('period', currentPeriod);
+    }
+    
+    const { data, error } = await query.order('created_at', { ascending: false });
     if (!error) setProducts(data || []);
     setLoading(false);
   };
@@ -36,10 +44,18 @@ function Products() {
   const addOrUpdateProduct = async (e) => {
     e.preventDefault();
     
+    const productData = {
+      name: name,
+      category: category,
+      size: size,
+      color: color,
+      price: parseFloat(price),
+      quantity: parseInt(quantity),
+      period: currentPeriod
+    };
+    
     if (editingId) {
-      const { error } = await supabase.from('products').update({
-        name, category, size, color, price: parseFloat(price), quantity: parseInt(quantity)
-      }).eq('id', editingId);
+      const { error } = await supabase.from('products').update(productData).eq('id', editingId);
       if (error) {
         alert('Error: ' + error.message);
       } else {
@@ -48,13 +64,11 @@ function Products() {
         loadProducts();
       }
     } else {
-      const { error } = await supabase.from('products').insert([{
-        name, category, size, color, price: parseFloat(price), quantity: parseInt(quantity)
-      }]);
+      const { error } = await supabase.from('products').insert([productData]);
       if (error) {
         alert('Error: ' + error.message);
       } else {
-        alert('Product added!');
+        alert('Product added for ' + currentPeriod + '!');
         resetForm();
         loadProducts();
       }
@@ -79,21 +93,33 @@ function Products() {
     setShowForm(false);
   };
 
-  useEffect(() => { loadProducts(); }, []);
+  useEffect(() => {
+    if (currentPeriod) {
+      loadProducts();
+    }
+  }, [currentPeriod]);
 
   return (
     <div style={{ padding: '16px' }}>
+      <PeriodSelector currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} />
+      
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
         <div>
           <h1 style={{ fontSize: '20px', color: '#1e293b', margin: 0 }}>{t.productManagement}</h1>
-          <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0' }}>Manage inventory and stock</p>
+          <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0' }}>
+            {currentPeriod ? 'Showing stock for: ' + currentPeriod : 'Select a period above'}
+          </p>
         </div>
-        <button onClick={() => { resetForm(); setShowForm(!showForm); }} style={{ backgroundColor: '#3b82f6', color: 'white', padding: '10px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>{showForm ? 'Cancel' : '+ ' + t.addProduct}</button>
+        {currentPeriod && (
+          <button onClick={() => { resetForm(); setShowForm(!showForm); }} style={{ backgroundColor: '#3b82f6', color: 'white', padding: '10px 16px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
+            {showForm ? 'Cancel' : '+ Add Product for ' + currentPeriod}
+          </button>
+        )}
       </div>
 
-      {showForm && (
+      {showForm && currentPeriod && (
         <form onSubmit={addOrUpdateProduct} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ fontSize: '14px', marginBottom: '12px', color: '#1e293b' }}>{editingId ? 'Edit Product' : t.newProduct}</h3>
+          <h3 style={{ fontSize: '14px', marginBottom: '12px', color: '#1e293b' }}>{editingId ? 'Edit Product' : 'New Product for ' + currentPeriod}</h3>
           <input type="text" placeholder={t.productName + ' *'} value={name} onChange={(e) => setName(e.target.value)} required style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
           <input type="text" placeholder={t.category} value={category} onChange={(e) => setCategory(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
           <input type="text" placeholder={t.size} value={size} onChange={(e) => setSize(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '10px', fontSize: '14px' }} />
@@ -107,14 +133,27 @@ function Products() {
         </form>
       )}
 
-      {loading ? <p>{t.loading}</p> : products.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '12px' }}>{t.noProducts}</div>
-      ) : (
-        products.map(p => (
+      {!currentPeriod && (
+        <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '12px' }}>
+          Please select or create a period above to manage products
+        </div>
+      )}
+
+      {currentPeriod && loading && <p>{t.loading}</p>}
+
+      {currentPeriod && !loading && products.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '12px' }}>
+          No products for {currentPeriod}. Click + Add Product to add new stock.
+        </div>
+      )}
+
+      {currentPeriod && !loading && products.length > 0 && products.map(function(p) {
+        return (
           <div key={p.id} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', marginBottom: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
               <div>
                 <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#1e293b' }}>{p.name}</span>
+                {p.period && <span style={{ fontSize: '10px', color: '#64748b', marginLeft: '8px' }}>({p.period})</span>}
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={() => startEdit(p)} style={{ backgroundColor: '#f59e0b', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Edit</button>
@@ -131,8 +170,8 @@ function Products() {
               <span style={{ fontSize: '13px', color: '#64748b' }}>{t.stock}: {p.quantity}</span>
             </div>
           </div>
-        ))
-      )}
+        );
+      })}
     </div>
   );
 }
